@@ -7,9 +7,7 @@ const outputFile = path.join(outputFolder, 'new-css-file.css');
 
 async function mergeStyles() {
   try {
-    if (!fs.existsSync(outputFolder)) {
-      fs.mkdirSync(outputFolder);
-    }
+    await fs.promises.mkdir(outputFolder, { recursive: true });
 
     const writeStream = fs.createWriteStream(outputFile);
 
@@ -20,8 +18,12 @@ async function mergeStyles() {
       const fileExt = path.extname(file);
 
       if (fileExt === '.css') {
-        const data = await fs.promises.readFile(pathToFile, 'utf8');
-        writeStream.write(data + '\n');
+        const fileStat = await fs.promises.stat(pathToFile);
+
+        if (fileStat.isFile()) {
+          const data = await fs.promises.readFile(pathToFile, 'utf8');
+          writeStream.write(data + '\n');
+        }
       }
     }
 
